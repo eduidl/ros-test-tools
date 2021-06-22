@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ros_timer_factory</name>
+  <version>0.0.1</version>
+  <description>The ros_timer_factory package</description>
+
+  <maintainer email="yuma.hiramatsu@gmail.com">Yuma Hiramatsu</maintainer>
+  <author email="yuma.hiramatsu@gmail.com">Yuma Hiramatsu</author>
+
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+
+  <test_depend>rostest</test_depend>
+
+  <export></export>
+</package>
