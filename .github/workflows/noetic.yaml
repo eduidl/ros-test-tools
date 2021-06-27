@@ -1,0 +1,50 @@
+name: Noetic
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            ros_distro: noetic
+            python: python3
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: ./src/target_pkg
+
+      - name: Setup ROS environment
+        uses: ros-tooling/setup-ros@v0.2
+        with:
+          required-ros-distributions: ${{ matrix.ros_distro }}
+
+      - name: Resolve dependencies
+        run: |
+          source /opt/ros/${{ matrix.ros_distro }}/setup.bash
+          sudo apt update -qq
+          sudo apt install -y \
+            ${{ matrix.python }}-osrf-pycommon \
+            ${{ matrix.python }}-catkin-tools
+          rosdep update -q
+          rosdep install -yi --from-paths ./src --rosdistro=$ROS_DISTRO
+
+      - name: Build package
+        run: |
+          source /opt/ros/${{ matrix.ros_distro }}/setup.bash
+          catkin init
+          catkin build --no-status
+
+      - name: Run test
+        run: |
+          source /opt/ros/${{ matrix.ros_distro }}/setup.bash
+          source ./devel/setup.bash
+          catkin run_tests --no-status
+          catkin_test_results ./build
