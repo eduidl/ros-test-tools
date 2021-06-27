@@ -27,8 +27,6 @@ jobs:
 
       - name: Resolve dependencies
         run: |
-          ls ./src
-          ls ./src/target_pkg
           source /opt/ros/${{ matrix.env.ros_distro }}/setup.bash
           sudo apt update -qq
           sudo apt install -y ${{ matrix.env.python }}-catkin-tools ${{ matrix.env.python }}-rosdep
