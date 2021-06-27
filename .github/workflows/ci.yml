@@ -11,11 +11,39 @@ jobs:
     strategy:
       matrix:
         env:
-          - { ROS_DISTRO: melodic, ROS_REPO: main }
-          - { ROS_DISTRO: noetic, ROS_REPO: main }
+          - { ros_distro: melodic, python: python }
+          - { ros_distro: noetic, python: python3 }
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        path: ./src/target_pkg
 
-      - uses: ros-industrial/industrial_ci@master
-        env: ${{ matrix.env }}
+      - name: Setup ROS environment
+        uses: ros-tooling/setup-ros@v0.2
+        with:
+          reuired-ros-distributions: ${{ matrix.env.ros_distro }}
+
+      - name: Resolve dependencies
+        run: |
+          ls ./src
+          ls ./src/target_pkg
+          source /opt/ros/${{ matrix.env.ros_distro }}/setup.bash
+          sudo apt update -qq
+          sudo apt install -y ${{ matrix.env.python }}-catkin-tools ${{ matrix.env.python }}-rosdep
+          sudo rosdep init
+          rosdep update -q
+          rosdep install -yi --from-paths ./src --rosdistro=$ROS_DISTRO
+
+      - name: Build package
+        run: |
+          source /opt/ros/${{ matrix.env.ros_distro }}/setup.bash
+          catkin init
+          catkin build
+
+      - name: Run test
+        run: |
+          source /opt/ros/${{ matrix.env.ros_distro }}/setup.bash
+          source ./devel/setup.bash
+          catkin run_tests
+          catkin_test_results ./
